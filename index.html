@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>A酸療程進度追蹤器</title>
     
+    <!-- iPhone Web App 專用設定 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="A酸追蹤">
     
+    <!-- 精美 App Icon (SVG Data URI) -->
     <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' width='100' height='100'><rect width='100' height='100' rx='22' fill='%23007AFF'/><g transform='translate(15, 15) scale(0.7)'><path d='M44.5 5A16.5 16.5 0 0 0 28 21.5V54a4.5 4.5 0 0 0 4.5 4.5h23A4.5 4.5 0 0 0 60 54V21.5A16.5 16.5 0 0 0 43.5 5z' fill='%23FFFFFF'/><path d='M44.5 91A16.5 16.5 0 0 0 60 74.5V54H28v20.5A16.5 16.5 0 0 0 44.5 91z' fill='%23FF3B30'/><circle cx='44' cy='30' r='4' fill='%23007AFF'/><path d='M30 54h28' stroke='%23333333' stroke-width='3'/></g></svg>">
 
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -37,23 +40,54 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         button, a { -webkit-tap-highlight-color: transparent; }
-        body { touch-action: manipulation; }
+        
+        /* 💡 核心修正：將視窗徹底鎖定，防範 iOS Safari 鍵盤彈出或重設資料時造成的高度的變形起伏 */
+        html, body {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #F2F2F7;
+        }
+
+        /* 💡 核心修正：收服 iOS 原生日期欄位撐爆版面的野蠻行為 */
+        input[type="date"] {
+            -webkit-appearance: none;
+            appearance: none;
+            box-sizing: border-box;
+            max-width: 100%;
+        }
+        
+        /* 日期選擇器右側圖示微調，確保排版完美 */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            background-position: right center;
+            background-size: contain;
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex justify-center items-stretch md:items-center overflow-hidden">
+<body class="flex justify-center items-stretch md:items-center">
 
-    <div class="w-full max-w-md bg-iosBg flex flex-col h-[100dvh] md:h-[850px] md:rounded-[40px] md:shadow-2xl md:border-8 md:border-black relative overflow-hidden">
+    <!-- 手機容器 (h-full 緊貼 fixed body 視窗，保證不縮水) -->
+    <div class="w-full max-w-md bg-iosBg flex flex-col h-full md:h-[850px] md:rounded-[40px] md:shadow-2xl md:border-8 md:border-black relative overflow-hidden">
         
+        <!-- 頂部動態島安全區留白 -->
         <div class="pt-[env(safe-area-inset-top)] bg-iosBg shrink-0"></div>
 
+        <!-- 滾動內容區域 (底部預留空間避開 Tab Bar) -->
         <main class="flex-1 overflow-y-auto no-scrollbar px-5 py-4 pb-28" id="main-content">
             
+            <!-- 1. DASHBOARD TAB -->
             <div id="tab-dashboard" class="space-y-5">
                 <div>
                     <h1 class="text-xl font-bold text-gray-900 tracking-tight">今日塊面乾過沙漠未？🌵</h1>
                     <p class="text-xs text-gray-400 font-medium mt-1">Isotretinoin Progress</p>
                 </div>
 
+                <!-- 圓形進度環卡片 -->
                 <div class="bg-cardBg p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center">
                     <div class="relative w-44 h-44 flex items-center justify-center">
                         <svg class="w-full h-full transform -rotate-90">
@@ -79,6 +113,7 @@
                     </div>
                 </div>
 
+                <!-- 快捷按鈕 -->
                 <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100">
                     <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">💊 今日快捷記錄</h3>
                     <div class="grid grid-cols-4 gap-2">
@@ -90,10 +125,11 @@
                     <button onclick="openCustomLogModal()" class="w-full mt-3 bg-gray-50 text-gray-500 text-xs py-2 rounded-xl border border-gray-200">手動補記其他日期或劑量...</button>
                 </div>
 
+                <!-- 驗血日程提醒 (已修正日期輸入框爆板溢出) -->
                 <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-semibold text-gray-800">🩸 驗血日程提醒</h3>
-                        <input type="date" id="input-blood-date" onchange="saveBloodDate()" class="text-xs bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-gray-700">
+                    <div class="flex justify-between items-center gap-2">
+                        <h3 class="text-sm font-semibold text-gray-800 shrink-0">🩸 驗血日程提醒</h3>
+                        <input type="date" id="input-blood-date" onchange="saveBloodDate()" class="text-xs bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-gray-700 max-w-[130px] focus:outline-none focus:border-iosBlue shrink">
                     </div>
                     <div class="flex items-center justify-between bg-amber-50/50 p-2.5 rounded-xl border border-amber-100 text-xs text-amber-800">
                         <span>下次預計驗血日期：</span>
@@ -114,6 +150,7 @@
                     </div>
                 </div>
 
+                <!-- 體重資訊 -->
                 <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100 space-y-3">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center gap-2">
@@ -138,6 +175,7 @@
                 </div>
             </div>
 
+            <!-- 2. BLOOD TAB -->
             <div id="tab-blood" class="space-y-5 hidden">
                 <div>
                     <h1 class="text-xl font-bold text-gray-900 tracking-tight">驗血報告</h1>
@@ -149,7 +187,7 @@
                     <div class="space-y-3">
                         <div>
                             <label class="text-[10px] text-gray-400 font-bold block mb-1 uppercase tracking-wider">報告日期</label>
-                            <input type="date" id="blood-input-date" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-800 font-medium focus:outline-none focus:border-iosBlue">
+                            <input type="date" id="blood-input-date" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-800 font-medium focus:outline-none focus:border-iosBlue block min-h-[44px]">
                         </div>
                         
                         <div class="grid grid-cols-2 gap-3">
@@ -180,7 +218,8 @@
                 <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100 space-y-3">
                     <h3 class="text-sm font-semibold text-gray-800">最新驗血結果摘要</h3>
                     <div id="latest-blood-container" class="grid grid-cols-2 gap-3 text-xs">
-                        </div>
+                        <!-- 動態內容 -->
+                    </div>
                 </div>
 
                 <div class="bg-cardBg p-4 rounded-3xl shadow-sm border border-gray-100">
@@ -189,10 +228,12 @@
                         <span id="blood-history-arrow">▼</span>
                     </button>
                     <div id="blood-history-list" class="hidden mt-3 space-y-2.5 max-h-60 overflow-y-auto no-scrollbar">
-                        </div>
+                        <!-- 歷史數據 -->
+                    </div>
                 </div>
             </div>
 
+            <!-- 3. HISTORY TAB -->
             <div id="tab-history" class="space-y-5 hidden">
                 <div>
                     <h1 class="text-xl font-bold text-gray-900 tracking-tight">服藥紀錄</h1>
@@ -204,10 +245,12 @@
                         <span class="text-xs text-gray-500" id="history-count">共 0 日</span>
                     </div>
                     <div id="history-list" class="space-y-3 max-h-[480px] overflow-y-auto pr-1">
-                        </div>
+                        <!-- 服藥紀錄 -->
+                    </div>
                 </div>
             </div>
 
+            <!-- 4. SETTINGS TAB -->
             <div id="tab-settings" class="space-y-5 hidden">
                 <div>
                     <h1 class="text-xl font-bold text-gray-900 tracking-tight">設定與備份</h1>
@@ -258,6 +301,7 @@
 
         </main>
 
+        <!-- 手動補記 Modal -->
         <div id="modal-custom-log" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4">
                 <div class="flex justify-between items-center">
@@ -281,6 +325,7 @@
             </div>
         </div>
 
+        <!-- 自訂 Confirm Dialog -->
         <div id="modal-confirm" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
             <div class="bg-white/95 rounded-2xl w-full max-w-xs p-5 shadow-2xl text-center space-y-3">
                 <div class="space-y-1">
@@ -297,10 +342,12 @@
             </div>
         </div>
 
+        <!-- Toast 通告 -->
         <div id="toast" class="opacity-0 pointer-events-none fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-900/90 text-white text-xs font-semibold px-4 py-3 rounded-full shadow-lg transition-all duration-300 z-50">
             <span id="toast-message">紀錄成功！</span>
         </div>
 
+        <!-- 底部 Tab Bar 導航欄 (完美固定在底部安全區之上，不會受鍵盤或數據重置影響而移位) -->
         <nav class="bg-white/95 backdrop-blur-md border-t border-gray-200 absolute bottom-0 left-0 right-0 flex justify-around items-center px-2 pt-2.5 pb-[calc(6px+env(safe-area-inset-bottom))] z-40 shrink-0 shadow-[0_-3px_15px_rgba(0,0,0,0.03)]">
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center gap-1 text-iosBlue transition-colors w-16">
                 <svg class="w-5.5 h-5.5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
