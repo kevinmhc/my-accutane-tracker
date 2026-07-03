@@ -21,6 +21,7 @@
                 extend: {
                     colors: {
                         iosBlue: '#007AFF',
+                        iosIndigo: '#5856D6',
                         iosGreen: '#34C759',
                         iosRed: '#FF3B30',
                         iosBg: '#F2F2F7',
@@ -41,7 +42,7 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         button, a { -webkit-tap-highlight-color: transparent; }
         
-        /* 💡 核心修正：將視窗徹底鎖定，防範 iOS Safari 鍵盤彈出或重設資料時造成的高度的變形起伏 */
+        /* 核心修正：將視窗徹底鎖定，防範 iOS Safari 鍵盤彈出或重設資料時造成的高度變形起伏 */
         html, body {
             position: fixed;
             top: 0;
@@ -52,7 +53,7 @@
             background-color: #F2F2F7;
         }
 
-        /* 💡 核心修正：收服 iOS 原生日期欄位撐爆版面的野蠻行為 */
+        /* 收服 iOS 原生日期欄位撐爆版面的問題 */
         input[type="date"] {
             -webkit-appearance: none;
             appearance: none;
@@ -67,165 +68,202 @@
             margin: 0;
             padding: 0;
         }
+
+        /* 漸變發光柔和陰影 */
+        .ios-shadow {
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+        }
+        .ios-active:active {
+            transform: scale(0.96);
+            filter: brightness(0.95);
+        }
     </style>
 </head>
 <body class="flex justify-center items-stretch md:items-center">
 
     <!-- 手機容器 (h-full 緊貼 fixed body 視窗，保證不縮水) -->
-    <div class="w-full max-w-md bg-iosBg flex flex-col h-full md:h-[850px] md:rounded-[40px] md:shadow-2xl md:border-8 md:border-black relative overflow-hidden">
+    <div class="w-full max-w-md bg-iosBg flex flex-col h-full md:h-[850px] md:rounded-[40px] md:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)] md:border-[10px] md:border-black relative overflow-hidden">
         
         <!-- 頂部動態島安全區留白 -->
         <div class="pt-[env(safe-area-inset-top)] bg-iosBg shrink-0"></div>
 
         <!-- 滾動內容區域 (底部預留空間避開 Tab Bar) -->
-        <main class="flex-1 overflow-y-auto no-scrollbar px-5 py-4 pb-28" id="main-content">
+        <main class="flex-1 overflow-y-auto no-scrollbar px-5 py-5 pb-28" id="main-content">
             
             <!-- 1. DASHBOARD TAB -->
-            <div id="tab-dashboard" class="space-y-5">
-                <div>
-                    <h1 class="text-xl font-bold text-gray-900 tracking-tight">今日塊面乾過沙漠未？🌵</h1>
-                    <p class="text-xs text-gray-400 font-medium mt-1">Isotretinoin Progress</p>
+            <div id="tab-dashboard" class="space-y-6">
+                <!-- 大標題區 (升級視覺層次) -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-black text-slate-900 tracking-tight">今日塊面乾過沙漠未？🌵</h1>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Isotretinoin Progress</p>
+                    </div>
+                    <span class="text-2xl animate-bounce" style="animation-duration: 3s;">💧</span>
                 </div>
 
-                <!-- 圓形進度環卡片 -->
-                <div class="bg-cardBg p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center">
+                <!-- 圓形進度環卡片 (大幅升級為漸變色 glowing 風格) -->
+                <div class="bg-cardBg p-6 rounded-[28px] ios-shadow border border-slate-100 flex flex-col items-center relative overflow-hidden">
+                    <!-- 背景裝飾暗紋 -->
+                    <div class="absolute -top-10 -right-10 w-24 h-24 bg-blue-50/40 rounded-full blur-2xl"></div>
+                    <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-indigo-50/40 rounded-full blur-2xl"></div>
+
                     <div class="relative w-44 h-44 flex items-center justify-center">
                         <svg class="w-full h-full transform -rotate-90">
-                            <circle cx="88" cy="88" r="74" stroke="#E5E7EB" stroke-width="11" fill="transparent" />
-                            <circle id="progress-circle" cx="88" cy="88" r="74" stroke="#007AFF" stroke-width="11" fill="transparent"
+                            <defs>
+                                <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#007AFF" />
+                                    <stop offset="100%" stop-color="#5856D6" />
+                                </linearGradient>
+                            </defs>
+                            <!-- 背景灰色環 -->
+                            <circle cx="88" cy="88" r="74" stroke="#E5E8EB" stroke-width="10" fill="transparent" />
+                            <!-- 前景漸變色進度環 -->
+                            <circle id="progress-circle" cx="88" cy="88" r="74" stroke="url(#ring-gradient)" stroke-width="10" fill="transparent"
                                 stroke-dasharray="464.9" stroke-dashoffset="464.9" stroke-linecap="round" class="transition-all duration-700 ease-out" />
                         </svg>
+                        <!-- 內層文字 (高雅字體與色彩排版) -->
                         <div class="absolute text-center flex flex-col items-center justify-center">
-                            <span class="text-3xl font-extrabold text-gray-900 tracking-tight" id="pct-text">0.0%</span>
-                            <p class="text-[9px] text-gray-400 mt-0.5 font-bold uppercase tracking-wider">已完成劑量</p>
-                            <span class="text-[10px] text-iosBlue font-bold mt-1 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100" id="target-multiplier-display">-- mg/kg</span>
+                            <span class="text-4xl font-extrabold text-slate-900 tracking-tighter" id="pct-text">0.0%</span>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">已完成</p>
+                            <span class="text-[10px] text-iosBlue font-bold mt-1.5 bg-blue-50/80 px-2.5 py-0.5 rounded-full border border-blue-100/50" id="target-multiplier-display">-- mg/kg</span>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 w-full mt-5 border-t border-gray-100 pt-4">
-                        <div class="text-center border-r border-gray-100">
-                            <span class="text-xs text-gray-400 block mb-0.5">累計已食</span>
-                            <span class="text-base font-bold text-gray-800" id="stat-total-taken">0 mg</span>
+
+                    <!-- 累計數據展示 -->
+                    <div class="grid grid-cols-2 gap-4 w-full mt-6 border-t border-slate-100 pt-4">
+                        <div class="text-center border-r border-slate-100">
+                            <span class="text-[11px] text-slate-400 font-semibold block mb-0.5">累計已食</span>
+                            <span class="text-lg font-black text-slate-800" id="stat-total-taken">0 mg</span>
                         </div>
                         <div class="text-center">
-                            <span class="text-xs text-gray-400 block mb-0.5">目標總劑量</span>
-                            <span class="text-base font-bold text-iosBlue" id="stat-target-dose">0 mg</span>
+                            <span class="text-[11px] text-slate-400 font-semibold block mb-0.5">目標總劑量</span>
+                            <span class="text-lg font-black text-iosBlue" id="stat-target-dose">0 mg</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- 快捷按鈕 -->
-                <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100">
-                    <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">💊 今日快捷記錄</h3>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button onclick="quickLog(10)" class="bg-blue-50 active:scale-95 transition-transform text-iosBlue py-3 px-1 rounded-2xl font-bold text-sm border border-blue-100">10mg</button>
-                        <button onclick="quickLog(20)" class="bg-blue-50 active:scale-95 transition-transform text-iosBlue py-3 px-1 rounded-2xl font-bold text-sm border border-blue-100">20mg</button>
-                        <button onclick="quickLog(30)" class="bg-blue-50 active:scale-95 transition-transform text-iosBlue py-3 px-1 rounded-2xl font-bold text-sm border border-blue-100">30mg</button>
-                        <button onclick="quickLog(40)" class="bg-blue-50 active:scale-95 transition-transform text-iosBlue py-3 px-1 rounded-2xl font-bold text-sm border border-blue-100">40mg</button>
+                <!-- 快捷按鈕 (升級為漸變觸感更立體嘅設計) -->
+                <div class="bg-cardBg p-5 rounded-[28px] ios-shadow border border-slate-100">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                        <span class="text-sm">💊</span> 快速記錄今日劑量
+                    </h3>
+                    <div class="grid grid-cols-4 gap-2.5">
+                        <button onclick="quickLog(10)" class="ios-active bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-200/50 text-iosBlue py-3 px-1 rounded-2xl font-bold text-sm border border-blue-100/60 shadow-sm transition-all">10mg</button>
+                        <button onclick="quickLog(20)" class="ios-active bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-200/50 text-iosBlue py-3 px-1 rounded-2xl font-bold text-sm border border-blue-100/60 shadow-sm transition-all">20mg</button>
+                        <button onclick="quickLog(30)" class="ios-active bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-200/50 text-iosBlue py-3 px-1 rounded-2xl font-bold text-sm border border-blue-100/60 shadow-sm transition-all">30mg</button>
+                        <button onclick="quickLog(40)" class="ios-active bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-200/50 text-iosBlue py-3 px-1 rounded-2xl font-bold text-sm border border-blue-100/60 shadow-sm transition-all">40mg</button>
                     </div>
-                    <button onclick="openCustomLogModal()" class="w-full mt-3 bg-gray-50 text-gray-500 text-xs py-2 rounded-xl border border-gray-200">手動補記其他日期或劑量...</button>
+                    <button onclick="openCustomLogModal()" class="w-full mt-3 bg-slate-50 hover:bg-slate-100 text-slate-500 font-semibold text-xs py-2.5 rounded-xl border border-slate-200 transition-colors">
+                        🖊️ 手動補記其他日期或劑量...
+                    </button>
                 </div>
 
-                <!-- 驗血日程提醒 (已修正日期輸入框爆板溢出) -->
-                <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100 space-y-3">
+                <!-- 驗血日程提醒 (美化輸入框與小卡片) -->
+                <div class="bg-cardBg p-5 rounded-[28px] ios-shadow border border-slate-100 space-y-3.5">
                     <div class="flex justify-between items-center gap-2">
-                        <h3 class="text-sm font-semibold text-gray-800 shrink-0">🩸 驗血日程提醒</h3>
-                        <input type="date" id="input-blood-date" onchange="saveBloodDate()" class="text-xs bg-gray-50 border border-gray-200 rounded-lg p-1.5 text-gray-700 max-w-[130px] focus:outline-none focus:border-iosBlue shrink">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 shrink-0">
+                            <span>🩸</span> 下次驗血日程
+                        </h3>
+                        <input type="date" id="input-blood-date" onchange="saveBloodDate()" class="text-xs bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 max-w-[130px] font-semibold focus:outline-none focus:border-iosBlue shrink ios-shadow">
                     </div>
-                    <div class="flex items-center justify-between bg-amber-50/50 p-2.5 rounded-xl border border-amber-100 text-xs text-amber-800">
-                        <span>下次預計驗血日期：</span>
-                        <strong id="display-blood-date">未設定</strong>
+                    <div class="flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50/60 p-3 rounded-2xl border border-amber-100/60 text-xs text-amber-800 shadow-sm">
+                        <span class="font-medium">預定日期：</span>
+                        <strong id="display-blood-date" class="font-black text-amber-900 bg-white/70 px-2 py-0.5 rounded-lg border border-amber-200/40">未設定</strong>
                     </div>
-                    <div class="space-y-1.5 pt-1">
-                        <span class="text-[10px] text-gray-400 block font-semibold uppercase">預計檢驗項目：</span>
-                        <div class="grid grid-cols-2 gap-2">
-                            <label class="flex items-center gap-2 text-xs text-gray-600">
-                                <input type="checkbox" id="check-alt" onchange="saveBloodChecks()" class="rounded text-iosBlue">
-                                <span>肝功能 (ALT/AST)</span>
+                    <div class="space-y-2 pt-1">
+                        <span class="text-[9px] text-slate-400 block font-bold uppercase tracking-wider">預計檢驗項目：</span>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="flex items-center gap-2 text-xs text-slate-600 bg-slate-50/70 p-2.5 rounded-xl border border-slate-100 cursor-pointer active:scale-95 transition-transform">
+                                <input type="checkbox" id="check-alt" onchange="saveBloodChecks()" class="rounded-md w-4 h-4 text-iosBlue border-slate-300 focus:ring-0">
+                                <span class="font-semibold">ALT/AST (肝)</span>
                             </label>
-                            <label class="flex items-center gap-2 text-xs text-gray-600">
-                                <input type="checkbox" id="check-lip" onchange="saveBloodChecks()" class="rounded text-iosBlue">
-                                <span>血脂 (膽固醇/三酸)</span>
+                            <label class="flex items-center gap-2 text-xs text-slate-600 bg-slate-50/70 p-2.5 rounded-xl border border-slate-100 cursor-pointer active:scale-95 transition-transform">
+                                <input type="checkbox" id="check-lip" onchange="saveBloodChecks()" class="rounded-md w-4 h-4 text-iosBlue border-slate-300 focus:ring-0">
+                                <span class="font-semibold">血脂 (膽固醇)</span>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <!-- 體重資訊 -->
-                <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100 space-y-3">
+                <!-- 體重資訊 (優化排版) -->
+                <div class="bg-cardBg p-5 rounded-[28px] ios-shadow border border-slate-100 space-y-4">
                     <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-2">
-                            <span class="text-lg">⚖️</span>
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-2xl bg-indigo-50 flex items-center justify-center text-lg text-indigo-500">⚖️</div>
                             <div>
-                                <span class="text-xs text-gray-400 block">目前設定體重</span>
-                                <span class="text-sm font-bold text-gray-800" id="stat-weight">-- kg</span>
+                                <span class="text-[10px] text-slate-400 font-bold uppercase block">個人設定體重</span>
+                                <span class="text-base font-black text-slate-800" id="stat-weight">-- kg</span>
                             </div>
                         </div>
-                        <button onclick="switchTab('settings')" class="text-xs text-iosBlue font-semibold bg-blue-50 px-3 py-1.5 rounded-full">修改體重</button>
+                        <button onclick="switchTab('settings')" class="text-xs text-iosBlue font-bold bg-blue-50/80 border border-blue-100/50 px-3 py-1.5 rounded-full ios-active">修改體重</button>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 border-t border-gray-50 pt-3">
+                    <div class="grid grid-cols-2 gap-4 border-t border-slate-50 pt-3.5 text-xs">
                         <div>
-                            <span class="text-xs text-gray-400 block mb-0.5">重有幾多要食</span>
-                            <span class="text-sm font-bold text-gray-800" id="stat-remaining">0 mg</span>
+                            <span class="text-slate-400 font-semibold block mb-0.5">重有幾多要食</span>
+                            <span class="text-base font-black text-slate-800" id="stat-remaining">0 mg</span>
                         </div>
                         <div>
-                            <span class="text-xs text-gray-400 block mb-0.5">預估剩餘天數</span>
-                            <span class="text-sm font-bold text-gray-800" id="stat-days-left">-- 天</span>
+                            <span class="text-slate-400 font-semibold block mb-0.5">預估剩餘天數</span>
+                            <span class="text-base font-black text-slate-800" id="stat-days-left">-- 天</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- 2. BLOOD TAB -->
-            <div id="tab-blood" class="space-y-5 hidden">
+            <div id="tab-blood" class="space-y-6 hidden">
                 <div>
-                    <h1 class="text-xl font-bold text-gray-900 tracking-tight">驗血報告</h1>
-                    <p class="text-xs text-gray-400 font-medium mt-1">Blood Test Logs</p>
+                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">驗血報告</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Blood Test Logs</p>
                 </div>
 
-                <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100 space-y-4">
-                    <h3 class="text-sm font-semibold text-gray-800 border-b border-gray-50 pb-1">登記新驗血報告</h3>
-                    <div class="space-y-3">
+                <!-- 登記新驗血報告 (精緻輸入框) -->
+                <div class="bg-cardBg p-5 rounded-[28px] ios-shadow border border-slate-100 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-50 pb-2">📝 登記新驗血報告</h3>
+                    <div class="space-y-3.5">
                         <div>
-                            <label class="text-[10px] text-gray-400 font-bold block mb-1 uppercase tracking-wider">報告日期</label>
-                            <input type="date" id="blood-input-date" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-800 font-medium focus:outline-none focus:border-iosBlue block min-h-[44px]">
+                            <label class="text-[10px] text-slate-400 font-bold block mb-1 uppercase tracking-wider">報告日期</label>
+                            <input type="date" id="blood-input-date" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-800 font-semibold focus:outline-none focus:border-iosBlue block min-h-[46px] ios-shadow">
                         </div>
                         
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="text-[10px] text-gray-400 font-bold block mb-1 uppercase">ALT 肝功能 (&lt;40)</label>
-                                <input type="number" id="blood-input-alt" placeholder="U/L" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-800 focus:outline-none">
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1 uppercase">ALT 肝功能 (&lt;40)</label>
+                                <input type="number" id="blood-input-alt" placeholder="U/L" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-800 font-semibold focus:outline-none focus:border-iosBlue">
                             </div>
                             <div>
-                                <label class="text-[10px] text-gray-400 font-bold block mb-1 uppercase">AST 肝功能 (&lt;40)</label>
-                                <input type="number" id="blood-input-ast" placeholder="U/L" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-800 focus:outline-none">
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1 uppercase">AST 肝功能 (&lt;40)</label>
+                                <input type="number" id="blood-input-ast" placeholder="U/L" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-800 font-semibold focus:outline-none focus:border-iosBlue">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="text-[10px] text-gray-400 font-bold block mb-1 uppercase">總膽固醇 (&lt;5.2)</label>
-                                <input type="number" id="blood-input-chol" step="0.1" placeholder="mmol/L" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-800 focus:outline-none">
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1 uppercase">總膽固醇 (&lt;5.2)</label>
+                                <input type="number" id="blood-input-chol" step="0.1" placeholder="mmol/L" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-800 font-semibold focus:outline-none focus:border-iosBlue">
                             </div>
                             <div>
-                                <label class="text-[10px] text-gray-400 font-bold block mb-1 uppercase">三酸甘油酯 (&lt;1.7)</label>
-                                <input type="number" id="blood-input-tg" step="0.1" placeholder="mmol/L" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-800 focus:outline-none">
+                                <label class="text-[10px] text-slate-400 font-bold block mb-1 uppercase">三酸甘油酯 (&lt;1.7)</label>
+                                <input type="number" id="blood-input-tg" step="0.1" placeholder="mmol/L" class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-800 font-semibold focus:outline-none focus:border-iosBlue">
                             </div>
                         </div>
                     </div>
-                    <button onclick="addBloodLog()" class="w-full bg-iosBlue text-white font-bold py-3.5 rounded-2xl text-xs active:scale-95 transition-transform mt-2">儲存驗血紀錄</button>
+                    <button onclick="addBloodLog()" class="w-full bg-iosBlue hover:bg-blue-600 text-white font-bold py-3.5 rounded-2xl text-xs ios-active shadow-md mt-2 transition-all">儲存驗血紀錄</button>
                 </div>
 
-                <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100 space-y-3">
-                    <h3 class="text-sm font-semibold text-gray-800">最新驗血結果摘要</h3>
+                <!-- 最新驗血報告摘要 -->
+                <div class="bg-cardBg p-5 rounded-[28px] ios-shadow border border-slate-100 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest">🧬 最新驗血結果摘要</h3>
                     <div id="latest-blood-container" class="grid grid-cols-2 gap-3 text-xs">
                         <!-- 動態內容 -->
                     </div>
                 </div>
 
-                <div class="bg-cardBg p-4 rounded-3xl shadow-sm border border-gray-100">
-                    <button onclick="toggleBloodHistory()" class="w-full flex justify-between items-center text-sm font-semibold text-gray-800">
-                        <span>歷史血檢紀錄</span>
-                        <span id="blood-history-arrow">▼</span>
+                <!-- 歷史驗血紀錄 -->
+                <div class="bg-cardBg p-4 rounded-[24px] ios-shadow border border-slate-100">
+                    <button onclick="toggleBloodHistory()" class="w-full flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-widest px-1">
+                        <span>📋 歷史血檢紀錄</span>
+                        <span id="blood-history-arrow" class="text-slate-400">▼</span>
                     </button>
                     <div id="blood-history-list" class="hidden mt-3 space-y-2.5 max-h-60 overflow-y-auto no-scrollbar">
                         <!-- 歷史數據 -->
@@ -234,67 +272,70 @@
             </div>
 
             <!-- 3. HISTORY TAB -->
-            <div id="tab-history" class="space-y-5 hidden">
+            <div id="tab-history" class="space-y-6 hidden">
                 <div>
-                    <h1 class="text-xl font-bold text-gray-900 tracking-tight">服藥紀錄</h1>
-                    <p class="text-xs text-gray-400 font-medium mt-1">Dosing History</p>
+                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">服藥紀錄</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Dosing History</p>
                 </div>
-                <div class="bg-cardBg p-4 rounded-3xl shadow-sm border border-gray-100">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-sm font-semibold text-gray-800">所有服藥紀錄</h3>
-                        <span class="text-xs text-gray-500" id="history-count">共 0 日</span>
+                <div class="bg-cardBg p-4 rounded-[28px] ios-shadow border border-slate-100">
+                    <div class="flex justify-between items-center mb-4 px-1 border-b border-slate-50 pb-2">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest">📅 歷史服藥日誌</h3>
+                        <span class="text-xs text-iosBlue font-black bg-blue-50 px-2.5 py-0.5 rounded-full" id="history-count">共 0 日</span>
                     </div>
-                    <div id="history-list" class="space-y-3 max-h-[480px] overflow-y-auto pr-1">
+                    <div id="history-list" class="space-y-3 max-h-[480px] overflow-y-auto pr-1 no-scrollbar">
                         <!-- 服藥紀錄 -->
                     </div>
                 </div>
             </div>
 
             <!-- 4. SETTINGS TAB -->
-            <div id="tab-settings" class="space-y-5 hidden">
+            <div id="tab-settings" class="space-y-6 hidden">
                 <div>
-                    <h1 class="text-xl font-bold text-gray-900 tracking-tight">設定與備份</h1>
-                    <p class="text-xs text-gray-400 font-medium mt-1">Settings & Backups</p>
+                    <h1 class="text-2xl font-black text-slate-900 tracking-tight">設定與備份</h1>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Settings & Backups</p>
                 </div>
 
-                <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100 space-y-4">
-                    <h3 class="text-sm font-semibold text-gray-800 border-b border-gray-50 pb-2">療程基礎設定</h3>
+                <!-- 基礎設定 -->
+                <div class="bg-cardBg p-5 rounded-[28px] ios-shadow border border-slate-100 space-y-4">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-50 pb-2">療程基礎設定</h3>
                     <div class="space-y-2">
-                        <label class="text-xs font-semibold text-gray-500 block">你嘅最新體重 (kg)</label>
+                        <label class="text-xs font-bold text-slate-400 uppercase">最新體重 (kg)</label>
                         <div class="flex gap-2">
                             <input type="number" id="input-weight" value="60" min="20" max="200" step="0.1"
-                                class="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-base font-bold text-gray-800 focus:outline-none">
-                            <button onclick="saveSettings()" class="bg-iosBlue text-white font-bold px-5 py-3 rounded-2xl text-sm">儲存</button>
+                                class="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-base font-black text-slate-800 focus:outline-none focus:border-iosBlue">
+                            <button onclick="saveSettings()" class="bg-iosBlue text-white font-bold px-6 py-3 rounded-2xl text-sm ios-active shadow-sm">儲存</button>
                         </div>
                     </div>
                     <div class="space-y-2 pt-1">
-                        <label class="text-xs font-semibold text-gray-500 block">每公斤累積劑量目標 (mg/kg)</label>
+                        <label class="text-xs font-bold text-slate-400 uppercase">每公斤累積劑量目標 (mg/kg)</label>
                         <select id="input-target-multiplier" onchange="saveSettings()" 
-                            class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm font-medium text-gray-800 focus:outline-none">
-                            <option value="120">120 mg/kg</option>
-                            <option value="135">135 mg/kg</option>
-                            <option value="150" selected>150 mg/kg</option>
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-iosBlue ios-shadow">
+                            <option value="120">120 mg/kg (一般低標)</option>
+                            <option value="135">135 mg/kg (中等標準)</option>
+                            <option value="150" selected>150 mg/kg (建議高標 - 防復發)</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100 space-y-3">
-                    <h3 class="text-sm font-semibold text-gray-800 border-b border-gray-50 pb-2">數據安全備份 (防消失)</h3>
+                <!-- 備份 -->
+                <div class="bg-cardBg p-5 rounded-[28px] ios-shadow border border-slate-100 space-y-3">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-50 pb-2">數據安全備份</h3>
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="exportData()" class="bg-blue-50 text-iosBlue border border-blue-100 py-3 rounded-2xl text-xs font-bold">📤 匯出資料備份</button>
-                        <button onclick="importDataPrompt()" class="bg-green-50 text-iosGreen border border-green-100 py-3 rounded-2xl text-xs font-bold">📥 匯入資料還原</button>
+                        <button onclick="exportData()" class="bg-blue-50/80 hover:bg-blue-100 text-iosBlue border border-blue-100/50 py-3 rounded-2xl text-xs font-bold transition-all ios-active">📤 匯出備份</button>
+                        <button onclick="importDataPrompt()" class="bg-green-50/80 hover:bg-green-100 text-iosGreen border border-green-100/50 py-3 rounded-2xl text-xs font-bold transition-all ios-active">📥 匯入還原</button>
                     </div>
                 </div>
 
-                <div class="bg-cardBg p-5 rounded-3xl shadow-sm border border-gray-100 space-y-3">
-                    <h3 class="text-sm font-semibold text-gray-800 border-b border-gray-50 pb-2">數據管理</h3>
+                <!-- 數據管理與安全防手殘 -->
+                <div class="bg-cardBg p-5 rounded-[28px] ios-shadow border border-slate-100 space-y-3">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-slate-50 pb-2">數據管理</h3>
                     <div id="rescue-container" class="hidden">
-                        <button onclick="applyRescueBackup()" class="w-full bg-amber-50 text-amber-800 border border-amber-200 py-3 rounded-2xl text-xs font-bold">
+                        <button onclick="applyRescueBackup()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/50 py-3.5 rounded-2xl text-xs font-bold ios-active transition-all">
                             💊 食後悔藥 (還原上次清除嘅數據)
                         </button>
                     </div>
-                    <button onclick="openResetModal()" class="w-full bg-red-50 text-iosRed border border-red-100 py-3 rounded-2xl text-xs font-bold">
-                        清除所有數據及重設
+                    <button onclick="openResetModal()" class="w-full bg-red-50 hover:bg-red-100 text-iosRed border border-red-100/60 py-3.5 rounded-2xl text-xs font-bold ios-active transition-all">
+                        ⚠️ 清除所有數據及重設
                     </button>
                 </div>
             </div>
@@ -347,23 +388,24 @@
             <span id="toast-message">紀錄成功！</span>
         </div>
 
-        <!-- 底部 Tab Bar 導航欄 (完美固定在底部安全區之上，不會受鍵盤或數據重置影響而移位) -->
-        <nav class="bg-white/95 backdrop-blur-md border-t border-gray-200 absolute bottom-0 left-0 right-0 flex justify-around items-center px-2 pt-2.5 pb-[calc(6px+env(safe-area-inset-bottom))] z-40 shrink-0 shadow-[0_-3px_15px_rgba(0,0,0,0.03)]">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center gap-1 text-iosBlue transition-colors w-16">
-                <svg class="w-5.5 h-5.5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                <span class="text-[9px] font-bold">進度主頁</span>
+        <!-- 底部 Tab Bar 導航欄 (1. 精密縮小版 Icon 及文字排版 2. 完美固定防走位) -->
+        <nav class="bg-white/95 backdrop-blur-md border-t border-gray-100 absolute bottom-0 left-0 right-0 h-16 flex justify-around items-center px-4 pb-1 pt-1 z-40 shrink-0 safe-bottom shadow-[0_-3px_15px_rgba(0,0,0,0.02)]">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center gap-0.5 text-iosBlue transition-colors w-16">
+                <!-- SVG Icon 尺寸由 w-5.5 / h-5.5 縮小為更加精緻精準的 w-5 / h-5 -->
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                <span class="text-[8.5px] font-bold tracking-tight">進度主頁</span>
             </button>
-            <button onclick="switchTab('blood')" id="nav-blood" class="flex flex-col items-center gap-1 text-gray-400 transition-colors w-16">
-                <svg class="w-5.5 h-5.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
-                <span class="text-[9px] font-medium">驗血報告</span>
+            <button onclick="switchTab('blood')" id="nav-blood" class="flex flex-col items-center gap-0.5 text-slate-400 transition-colors w-16">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
+                <span class="text-[8.5px] font-medium tracking-tight">驗血報告</span>
             </button>
-            <button onclick="switchTab('history')" id="nav-history" class="flex flex-col items-center gap-1 text-gray-400 transition-colors w-16">
-                <svg class="w-5.5 h-5.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-                <span class="text-[9px] font-medium">服藥紀錄</span>
+            <button onclick="switchTab('history')" id="nav-history" class="flex flex-col items-center gap-0.5 text-slate-400 transition-colors w-16">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                <span class="text-[8.5px] font-medium tracking-tight">服藥紀錄</span>
             </button>
-            <button onclick="switchTab('settings')" id="nav-settings" class="flex flex-col items-center gap-1 text-gray-400 transition-colors w-16">
-                <svg class="w-5.5 h-5.5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0-.46-.18-.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
-                <span class="text-[9px] font-medium">設定備份</span>
+            <button onclick="switchTab('settings')" id="nav-settings" class="flex flex-col items-center gap-0.5 text-slate-400 transition-colors w-16">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0-.46-.18-.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                <span class="text-[8.5px] font-medium tracking-tight">設定備份</span>
             </button>
         </nav>
 
@@ -433,14 +475,14 @@
             ['dashboard', 'blood', 'history', 'settings'].forEach(t => document.getElementById(`tab-${t}`).classList.add('hidden'));
             ['dashboard', 'blood', 'history', 'settings'].forEach(t => {
                 const btn = document.getElementById(`nav-${t}`);
-                btn.className = "flex flex-col items-center gap-1 text-gray-400 transition-colors w-16";
-                btn.querySelector('span').className = "text-[9px] font-medium";
+                btn.className = "flex flex-col items-center gap-0.5 text-slate-400 transition-colors w-16";
+                btn.querySelector('span').className = "text-[8.5px] font-medium tracking-tight";
             });
 
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             const activeBtn = document.getElementById(`nav-${tabId}`);
-            activeBtn.className = "flex flex-col items-center gap-1 text-iosBlue transition-colors w-16";
-            activeBtn.querySelector('span').className = "text-[9px] font-bold";
+            activeBtn.className = "flex flex-col items-center gap-0.5 text-iosBlue transition-colors w-16";
+            activeBtn.querySelector('span').className = "text-[8.5px] font-bold tracking-tight";
 
             if (tabId === 'settings') checkRescueBackup();
             updateUI();
@@ -481,16 +523,16 @@
         function renderLatestBlood() {
             const container = document.getElementById('latest-blood-container');
             if (state.bloodLogs.length === 0) {
-                container.innerHTML = `<div class="text-center py-4 col-span-2 text-gray-400">暫無驗血數據</div>`;
+                container.innerHTML = `<div class="text-center py-4 col-span-2 text-slate-400">暫無驗血數據</div>`;
                 return;
             }
             const latest = [...state.bloodLogs].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
             container.innerHTML = `
-                <div class="col-span-2 text-center bg-gray-50 py-1 rounded-lg text-[10px] text-gray-400 font-bold">報告日期: ${formatChineseDate(latest.date)}</div>
-                <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex justify-between items-center"><span class="text-gray-500">ALT (肝)</span><span class="${latest.alt > 40 ? 'text-iosRed font-bold':'text-gray-800'}">${latest.alt || 0} U/L</span></div>
-                <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex justify-between items-center"><span class="text-gray-500">AST (肝)</span><span class="${latest.ast > 40 ? 'text-iosRed font-bold':'text-gray-800'}">${latest.ast || 0} U/L</span></div>
-                <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex justify-between items-center"><span class="text-gray-500">總膽固醇</span><span class="${latest.chol > 5.2 ? 'text-iosRed font-bold':'text-gray-800'}">${latest.chol || 0} mmol/L</span></div>
-                <div class="bg-gray-50 p-2.5 rounded-xl border border-gray-100 flex justify-between items-center"><span class="text-gray-500">三酸甘油</span><span class="${latest.tg > 1.7 ? 'text-iosRed font-bold':'text-gray-800'}">${latest.tg || 0} mmol/L</span></div>
+                <div class="col-span-2 text-center bg-slate-50 py-1.5 rounded-xl text-[10px] text-slate-400 font-bold border border-slate-100">報告日期: ${formatChineseDate(latest.date)}</div>
+                <div class="bg-slate-50/60 p-2.5 rounded-2xl border border-slate-100 flex justify-between items-center"><span class="text-slate-400 font-medium">ALT (肝)</span><span class="${latest.alt > 40 ? 'text-iosRed font-black':'text-slate-700 font-bold'}">${latest.alt || 0} U/L</span></div>
+                <div class="bg-slate-50/60 p-2.5 rounded-2xl border border-slate-100 flex justify-between items-center"><span class="text-slate-400 font-medium">AST (肝)</span><span class="${latest.ast > 40 ? 'text-iosRed font-black':'text-slate-700 font-bold'}">${latest.ast || 0} U/L</span></div>
+                <div class="bg-slate-50/60 p-2.5 rounded-2xl border border-slate-100 flex justify-between items-center"><span class="text-slate-400 font-medium">總膽固醇</span><span class="${latest.chol > 5.2 ? 'text-iosRed font-black':'text-slate-700 font-bold'}">${latest.chol || 0} mmol/L</span></div>
+                <div class="bg-slate-50/60 p-2.5 rounded-2xl border border-slate-100 flex justify-between items-center"><span class="text-slate-400 font-medium">三酸甘油</span><span class="${latest.tg > 1.7 ? 'text-iosRed font-black':'text-slate-700 font-bold'}">${latest.tg || 0} mmol/L</span></div>
             `;
         }
 
@@ -521,11 +563,11 @@
 
         function renderBloodHistoryList() {
             const list = document.getElementById('blood-history-list');
-            if (state.bloodLogs.length === 0) { list.innerHTML = `<div class="text-center py-2 text-gray-400 text-xs">無歷史數據</div>`; return; }
+            if (state.bloodLogs.length === 0) { list.innerHTML = `<div class="text-center py-2 text-slate-400 text-xs">無歷史數據</div>`; return; }
             list.innerHTML = [...state.bloodLogs].sort((a, b) => new Date(b.date) - new Date(a.date)).map(log => `
-                <div class="bg-gray-50 p-3 rounded-2xl text-[11px] border border-gray-100 flex justify-between items-center">
-                    <div><span class="font-bold text-gray-700 block mb-0.5">${formatChineseDate(log.date)}</span><span class="text-gray-500">ALT: ${log.alt} | AST: ${log.ast} | 膽固醇: ${log.chol}</span></div>
-                    <button onclick="deleteBloodLog(${log.id})" class="text-iosRed font-semibold px-2 py-1 bg-red-50 rounded-lg text-xs">刪除</button>
+                <div class="bg-slate-50/60 p-3 rounded-2xl text-[11px] border border-slate-100 flex justify-between items-center">
+                    <div><span class="font-black text-slate-700 block mb-0.5">${formatChineseDate(log.date)}</span><span class="text-slate-400 font-medium">ALT: ${log.alt} | AST: ${log.ast} | 膽固醇: ${log.chol}</span></div>
+                    <button onclick="deleteBloodLog(${log.id})" class="text-iosRed font-semibold px-2.5 py-1 bg-red-50 hover:bg-red-100 rounded-lg text-xs ios-active transition-all">刪除</button>
                 </div>
             `).join('');
         }
@@ -533,14 +575,14 @@
         function renderHistoryList() {
             const container = document.getElementById('history-list');
             document.getElementById('history-count').textContent = `共 ${state.logs.length} 日`;
-            if (state.logs.length === 0) { container.innerHTML = `<div class="text-center py-12 text-gray-400 text-sm">暫無服藥紀錄</div>`; return; }
+            if (state.logs.length === 0) { container.innerHTML = `<div class="text-center py-12 text-slate-400 text-sm">暫無服藥紀錄</div>`; return; }
             container.innerHTML = [...state.logs].sort((a, b) => new Date(b.date) - new Date(a.date)).map(log => `
-                <div class="flex justify-between items-center bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                <div class="flex justify-between items-center bg-slate-50/50 p-3.5 rounded-2xl border border-slate-100">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-iosBlue text-xs font-bold">💊</div>
-                        <div><span class="text-[10px] text-gray-400 block">${formatChineseDate(log.date)}</span><span class="text-sm font-bold text-gray-800">${log.dose} mg</span></div>
+                        <div class="w-8.5 h-8.5 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center text-lg shadow-sm border border-blue-100/40">💊</div>
+                        <div><span class="text-[10px] text-slate-400 font-bold block">${formatChineseDate(log.date)}</span><span class="text-sm font-extrabold text-slate-800">${log.dose} mg</span></div>
                     </div>
-                    <button onclick="deleteLog(${log.id})" class="text-xs text-iosRed font-semibold px-2 py-1 bg-red-50 rounded-lg">刪除</button>
+                    <button onclick="deleteLog(${log.id})" class="text-xs text-iosRed font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-xl ios-active transition-all">刪除</button>
                 </div>
             `).join('');
         }
